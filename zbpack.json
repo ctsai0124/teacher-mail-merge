@@ -1,0 +1,4 @@
+{
+  "build_command": "apt-get update && apt-get install -y libreoffice libreoffice-writer fonts-noto-cjk && pip install -r requirements.txt",
+  "start_command": "gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1"
+}
