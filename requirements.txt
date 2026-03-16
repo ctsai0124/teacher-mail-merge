@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: teacher-mail-merge
+    runtime: python
+    buildCommand: apt-get update && apt-get install -y libreoffice libreoffice-writer fonts-noto-cjk && pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
