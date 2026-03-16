@@ -211,7 +211,7 @@ def normalize_row(headers, row):
 # ══ 路由 ══
 @app.route('/')
 def index():
-    return send_from_directory('templates', 'index.html')
+    return send_from_directory('.', 'index.html')
 
 
 @app.route('/detect-fields', methods=['POST'])
