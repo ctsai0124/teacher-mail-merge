@@ -1,4 +1,4 @@
 {
-  "build_command": "apt-get update && apt-get install -y libreoffice libreoffice-writer fonts-noto-cjk && pip install -r requirements.txt",
-  "start_command": "gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1"
+  "build_command": "DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libreoffice libreoffice-writer fonts-noto-cjk && apt-get clean && rm -rf /var/lib/apt/lists/* && pip install -r requirements.txt",
+  "start_command": "HOME=/root gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1"
 }
