@@ -358,52 +358,6 @@ tbody td { padding: 8px 14px; }
   font-size: 13px; line-height: 1.85;
 }
 
-/* Download bar */
-.download-bar {
-  background: var(--ink); color: var(--paper);
-  padding: 12px 28px;
-  display: none; align-items: center; gap: 16px;
-  flex-wrap: wrap;
-}
-.download-bar.show { display: flex; }
-.dl-info { font-size: 12px; }
-.dl-info strong { color: var(--gold); }
-
-.dl-format-group {
-  display: flex; align-items: center; gap: 10px; margin-left: auto;
-}
-.dl-format-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px; color: #888; white-space: nowrap;
-}
-.dl-format-btns { display: flex; gap: 6px; }
-.btn-dl-fmt {
-  padding: 6px 14px;
-  background: transparent;
-  border: 1.5px solid #444;
-  border-radius: 6px;
-  color: #aaa;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px; font-weight: 500;
-  cursor: pointer; transition: all 0.15s;
-  display: flex; align-items: center; gap: 5px;
-}
-.btn-dl-fmt:hover { border-color: #888; color: var(--paper); }
-.btn-dl-fmt.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
-
-.btn-dl {
-  padding: 9px 22px;
-  background: var(--accent); color: white; border: none;
-  border-radius: 6px;
-  font-family: 'Noto Serif TC', serif; font-size: 12px; font-weight: 700;
-  cursor: pointer; transition: background 0.2s;
-  display: flex; align-items: center; gap: 6px;
-  white-space: nowrap;
-}
-.btn-dl:hover { background: #962e0a; }
-.btn-dl-receipt { background: var(--accent2) !important; }
-.btn-dl-receipt:hover { background: #174e8a !important; }
-
 /* Toast */
 .toast {
   position: fixed; bottom: 20px; right: 20px;
@@ -729,26 +683,6 @@ tbody td { padding: 8px 14px; }
               <span>尚未合併</span>
             </div>
           </div>
-          <div class="download-bar" id="downloadBar">
-            <div class="dl-info">共 <strong id="mergeCount">0</strong> 份文件合併完成</div>
-            <div class="dl-format-group">
-              <div class="dl-format-label">下載格式</div>
-              <div class="dl-format-btns">
-                <button class="btn-dl-fmt active" id="fmt-pdf" onclick="setFormat('pdf')">
-                  📄 PDF
-                </button>
-                <button class="btn-dl-fmt" id="fmt-word" onclick="setFormat('word')">
-                  📝 Word (.doc)
-                </button>
-              </div>
-            </div>
-            <button class="btn-dl" id="btnDownload" onclick="downloadMerged()">
-              ⬇ 下載合併檔案
-            </button>
-            <button class="btn-dl btn-dl-receipt" onclick="downloadReceipt()">
-              📋 下載簽收清冊
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -859,12 +793,6 @@ function setOption(mode) {
 // ── 下載格式切換 ──
 function setFormat(fmt) {
   downloadFormat = fmt;
-  // 底部按鈕
-  document.getElementById('fmt-pdf').classList.toggle('active', fmt === 'pdf');
-  document.getElementById('fmt-word').classList.toggle('active', fmt === 'word');
-  document.getElementById('btnDownload').textContent =
-    fmt === 'pdf' ? '⬇ 下載合併 PDF' : '⬇ 下載合併 Word (.doc)';
-  // 側邊欄按鈕同步
   document.getElementById('sdl-pdf').classList.toggle('active', fmt === 'pdf');
   document.getElementById('sdl-word').classList.toggle('active', fmt === 'word');
 }
@@ -1067,6 +995,7 @@ function getLabel(rowObj, idx) {
 
 async function runMerge() {
   document.getElementById('mergeBtn').disabled = true;
+  document.getElementById('sidebarDlBox').style.display = 'none';
   document.getElementById('progressBar').classList.add('show');
   document.getElementById('progressText').classList.add('show');
   document.getElementById('progressFill').style.width = '30%';
@@ -1111,8 +1040,6 @@ async function runMerge() {
     document.getElementById('progressFill').style.width = '100%';
     document.getElementById('progressFill').style.animation = 'none';
     document.getElementById('progressText').textContent = `✓ 合併完成！共 ${count} 份`;
-    document.getElementById('downloadBar').classList.add('show');
-    document.getElementById('mergeCount').textContent = count;
     document.getElementById('sc4').classList.remove('active');
     document.getElementById('sc4').classList.add('done');
     document.getElementById('sb4').textContent = '✓';
