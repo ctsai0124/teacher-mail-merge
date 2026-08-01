@@ -1026,8 +1026,36 @@ function renderTable() {
 }
 
 // ── Merge ──
+function normalizePreviewFieldName(name) {
+  return String(name ?? '').replace(/\s+/g, '').trim();
+}
+
 function mergeTemplate(tmpl, rowObj) {
-  return tmpl.replace(/\{\{([^}]+)\}\}/g, (_, k) => rowObj[k.trim()] ?? `{{${k}}}`);
+  if (!tmpl) return tmpl;
+
+  const values = {};
+  Object.entries(rowObj).forEach(([key, value]) => {
+    values[normalizePreviewFieldName(key)] = String(value ?? '');
+  });
+
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = tmpl;
+  const walker = document.createTreeWalker(wrapper, NodeFilter.SHOW_TEXT);
+  const textNodes = [];
+
+  while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+  textNodes.forEach(node => {
+    node.nodeValue = node.nodeValue.replace(
+      /\{\{\s*([^}]+?)\s*\}\}|[《«]\s*([^》»]+?)\s*[》»]/g,
+      (match, bracesField, angleField) => {
+        const key = normalizePreviewFieldName(bracesField || angleField);
+        return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : match;
+      }
+    );
+  });
+
+  return wrapper.innerHTML;
 }
 
 function getLabel(rowObj, idx) {
@@ -1056,6 +1084,12 @@ async function runMerge() {
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       });
       fd.append('docx', sampleBlob, '聘任書範本範例.docx');
+
+      // 內建範本也要轉成 HTML，才能顯示已套入資料的預覽
+      const previewResult = await mammoth.convertToHtml({
+        arrayBuffer: await sampleBlob.arrayBuffer()
+      });
+      wordRaw = previewResult.value;
     }
 
     fd.append('excel', excelFile);
@@ -1085,11 +1119,16 @@ async function runMerge() {
     document.getElementById('sidebarDlBox').style.display = 'flex';
     document.getElementById('sidebarCount').textContent = `共 ${count} 份`;
 
-    // 前端預覽（僅顯示範本結構）
+    // 前端預覽（套入每列 Excel 資料）
     mergedDocs = dataRows.map((r, i) => {
       const rowObj = {};
       dataHeaders.forEach((h, j) => rowObj[h] = String(r[j] ?? ''));
-      return { word: wordRaw || '（使用內建範例範本）', pingyue: pingyueHtml, label: getLabel(rowObj, i) };
+      const previewTemplate = wordRaw || '（無法建立範本預覽）';
+      return {
+        word: mergeTemplate(previewTemplate, rowObj),
+        pingyue: pingyueHtml,
+        label: getLabel(rowObj, i)
+      };
     });
     renderPreviewNav();
     showPreview(0);
