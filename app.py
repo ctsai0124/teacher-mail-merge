@@ -218,7 +218,7 @@ def merge_docx_files(docx1_path, docx2_path, out_path):
 
 def docx_to_pdf(docx_path, out_dir):
     subprocess.run(
-        ['libreoffice', '--headless', '--convert-to', 'pdf',
+        [shutil.which('soffice') or shutil.which('libreoffice') or 'libreoffice', '--headless', '--convert-to', 'pdf',
          '--outdir', out_dir, docx_path],
         capture_output=True, timeout=120
     )
